@@ -3,6 +3,7 @@ from django.db import models  # noqa F401
 
 class Pokemon(models.Model):
     title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
     image = models.ImageField(null=True, blank=True)
 
     def __str__(self):
@@ -15,8 +16,8 @@ class PokemonEntity(models.Model):
     lon = models.FloatField()
     appeared_at = models.DateTimeField(default=None)
     disappeared_at = models.DateTimeField(default=None)
-    level = models.IntegerField(blank=True)
-    health = models.IntegerField(blank=True)
-    strength = models.IntegerField(blank=True)
-    defence = models.IntegerField(blank=True)
-    stamina = models.IntegerField(blank=True)
+    level = models.IntegerField(null=True)
+    health = models.IntegerField(null=True)
+    strength = models.IntegerField(null=True)
+    defence = models.IntegerField(null=True)
+    stamina = models.IntegerField(null=True)
