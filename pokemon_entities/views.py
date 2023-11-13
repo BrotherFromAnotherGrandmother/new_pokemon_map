@@ -32,7 +32,8 @@ def show_all_pokemons(request):
     pokemons = Pokemon.objects.all()
 
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
-    for pokemon_entity in PokemonEntity.objects.filter(appeared_at__lt=localtime(), disappeared_at__gt=localtime()):
+    time_now = localtime()
+    for pokemon_entity in PokemonEntity.objects.filter(appeared_at__lt=time_now, disappeared_at__gt=time_now):
         add_pokemon(
             folium_map, pokemon_entity.lat,
             pokemon_entity.lon,
@@ -54,38 +55,36 @@ def show_all_pokemons(request):
 
 
 def show_pokemon(request, pokemon_id):
-    pokemons = Pokemon.objects.all()
     requested_pokemon = get_object_or_404(Pokemon, id=pokemon_id)
-    pokemon = pokemons.get(id=pokemon_id)
 
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
     time_now = localtime()
-    for pokemon_entity in pokemon.entities.filter(pokemon=requested_pokemon,
+    for pokemon_entity in requested_pokemon.entities.filter(pokemon=requested_pokemon,
                                                   appeared_at__lt=time_now,
                                                   disappeared_at__gt=time_now):
         add_pokemon(
             folium_map, pokemon_entity.lat,
             pokemon_entity.lon,
-            request.build_absolute_uri(pokemon.image.url)
+            request.build_absolute_uri(requested_pokemon.image.url)
         )
 
     pokemon_parametrs = {
         "pokemon_id": pokemon_id,
-        "title_ru": pokemon.title,
-        "title_en": pokemon.title_en,
-        "title_jp": pokemon.title_jp,
-        "description": pokemon.description,
-        "img_url": request.build_absolute_uri(pokemon.image.url),
+        "title_ru": requested_pokemon.title,
+        "title_en": requested_pokemon.title_en,
+        "title_jp": requested_pokemon.title_jp,
+        "description": requested_pokemon.description,
+        "img_url": request.build_absolute_uri(requested_pokemon.image.url),
     }
 
-    if pokemon.previous_evolution:
-        pokemon_parametrs["previous_evolution"] = {"title_ru": pokemon.previous_evolution.title,
-                                                   "pokemon_id": pokemon.previous_evolution.id,
+    if requested_pokemon.previous_evolution:
+        pokemon_parametrs["previous_evolution"] = {"title_ru": requested_pokemon.previous_evolution.title,
+                                                   "pokemon_id": requested_pokemon.previous_evolution.id,
                                                    "img_url": request.build_absolute_uri(
-                                                       pokemon.previous_evolution.image.url),
+                                                       requested_pokemon.previous_evolution.image.url),
                                                    }
 
-    pokemon = pokemon.next_evolutions.all().first()
+    pokemon = requested_pokemon.next_evolutions.first()
     if pokemon:
         pokemon_parametrs['next_evolution'] = {"title_ru": pokemon.title,
                                                "pokemon_id": pokemon.id,
